@@ -34,7 +34,7 @@ class Sphinxql
      * @param string $key, column name that maps to matched id returned by sphinx
      * @return mixed (either array or eloquentcollection)
      */
-    public function get($name=null, $sphinxKey='id', $dbKey='id', array $dbColums=[])
+    public function get($name=null, $sphinxKey='id', $dbKey='id', array $dbColumns=[])
     {
         $matchids = array_pluck($this->hits, $sphinxKey);
         if ($name===null)
