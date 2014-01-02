@@ -34,7 +34,7 @@ class Sphinxql
      * @param string $key, column name that maps to matched id returned by sphinx
      * @return mixed (either array or eloquentcollection)
      */
-    public function get($name=null, $sphinxKey='id', $dbKey='id', array $dbColumns=[])
+    public function get($name=null, $sphinxKey='id', $dbKey='id', array $dbColumns=[], $respect_sort_order = true)
     {
         $matchids = array_pluck($this->hits, $sphinxKey);
         if ($name===null)
@@ -63,6 +63,22 @@ class Sphinxql
                 $result = \DB::table($name)->whereIn($dbKey, $matchids)->get();
             }
         }
+
+        if($respect_sort_order)
+        {
+            if(isset($matchids))
+            {
+                $return_val = new \Illuminate\Database\Eloquent\Collection;
+
+                foreach($matchids as $matchid)
+                {
+                    $key = $this->getResultKeyByID($matchid, $result, $dbKey);
+                    $return_val->add($result[$key]);
+                }
+                return $return_val;
+            }
+        }
+
         return $result;
     }
     /**
@@ -72,5 +88,20 @@ class Sphinxql
     public function raw( $query )
     {
        return $this->library->getConnection()->query($query);
+    }
+
+    private function getResultKeyByID($id, $result, $idKey = 'id')
+    {
+        if(count($result) > 0)
+        {
+            foreach($result as $k => $result_item)
+            {
+                if ( $result_item->$idKey == $id )
+                {
+                    return $k;
+                }
+            }
+        }
+        return false;
     }
 }
