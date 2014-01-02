@@ -41,46 +41,52 @@ class Sphinxql
         {
             return $matchids;
         }
-        if (class_exists($name))
-        {
-            if ( ! empty ($dbColumns))
-            {
-                $result = call_user_func_array($name . "::whereIn", array($dbKey, $matchids))->get($dbColumns);
-            }
-            else
-            {
-                $result = call_user_func_array($name . "::whereIn", array($dbKey, $matchids))->get();
-            }
-        }
-        else
-        {
-            if ( ! empty ($dbColumns))
-            {
-                $result = \DB::table($name)->whereIn($dbKey, $matchids)->get($dbColumns);
-            }
-            else
-            {
-                $result = \DB::table($name)->whereIn($dbKey, $matchids)->get();
-            }
-        }
 
-        if($respect_sort_order)
-        {
-            if(isset($matchids))
+        if ($matchids) {
+            if (class_exists($name))
             {
-                $return_val = new \Illuminate\Database\Eloquent\Collection;
-
-                foreach($matchids as $matchid)
+                if ( ! empty ($dbColumns))
                 {
-                    $key = $this->getResultKeyByID($matchid, $result, $dbKey);
-                    $return_val->add($result[$key]);
+                    $result = call_user_func_array($name . "::whereIn", array($dbKey, $matchids))->get($dbColumns);
                 }
-                return $return_val;
+                else
+                {
+                    $result = call_user_func_array($name . "::whereIn", array($dbKey, $matchids))->get();
+                }
             }
-        }
+            else
+            {
+                if ( ! empty ($dbColumns))
+                {
+                    $result = \DB::table($name)->whereIn($dbKey, $matchids)->get($dbColumns);
+                }
+                else
+                {
+                    $result = \DB::table($name)->whereIn($dbKey, $matchids)->get();
+                }
+            }
 
-        return $result;
+            if($respect_sort_order)
+            {
+                if(isset($matchids))
+                {
+                    $return_val = new \Illuminate\Database\Eloquent\Collection;
+
+                    foreach($matchids as $matchid)
+                    {
+                        $key = $this->getResultKeyByID($matchid, $result, $dbKey);
+                        $return_val->add($result[$key]);
+                    }
+                    return $return_val;
+                }
+            }
+
+            return $result;
+        } else {
+            return $matchids;
+        }
     }
+
     /**
      * Execute raw query against the sphinx server
      * @param string $query
